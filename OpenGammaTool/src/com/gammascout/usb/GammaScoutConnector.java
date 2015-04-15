@@ -35,7 +35,6 @@ public class GammaScoutConnector implements Runnable
 	private String temp;
 	private boolean connected = false;
 
-
 	/**
 	 * Create a new connector to the named serial port
 	 * 
@@ -79,6 +78,7 @@ public class GammaScoutConnector implements Runnable
 				String dateTime = parts[4] + " " + parts[5];
 				DateFormat getDateFormat = new SimpleDateFormat(
 						"dd.MM.yy HH:mm:ss");
+				getDateFormat.setTimeZone(Tools.UTC_TIMEZONE);
 				try
 				{
 					deviceTime = getDateFormat.parse(dateTime);
@@ -263,6 +263,7 @@ public class GammaScoutConnector implements Runnable
 							String yy = pop();
 							DateFormat logDateFormat = new SimpleDateFormat(
 									"mmHHddMMyy");
+							logDateFormat.setTimeZone(Tools.UTC_TIMEZONE);
 							Date logDate = logDateFormat.parse(mm + HH + dd
 									+ MM + yy);
 							currentLogTime = logDate.getTime();
@@ -554,6 +555,7 @@ public class GammaScoutConnector implements Runnable
 		setPcMode(true);
 		// format the time
 		DateFormat setTimeFormat = new SimpleDateFormat("ddMMyyHHmmss");
+		setTimeFormat.setTimeZone(Tools.UTC_TIMEZONE);
 		String t = "t" + setTimeFormat.format(time);
 		for (int x = 0; x < t.length(); x++)
 		{

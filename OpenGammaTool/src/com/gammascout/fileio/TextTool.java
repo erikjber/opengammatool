@@ -17,6 +17,7 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.gammascout.usb.Reading;
+import com.gammascout.usb.Tools;
 
 /**
  * @author Erik Berglund
@@ -25,7 +26,10 @@ import com.gammascout.usb.Reading;
 public class TextTool
 {
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	
+	static
+	{
+		DATE_FORMAT.setTimeZone(Tools.UTC_TIMEZONE);
+	}
 	/**
 	 * Open a "save as" dialog and ask the user for a file name.
 	 * Write the data as Comma Separated Values (CSV) to the desired file.

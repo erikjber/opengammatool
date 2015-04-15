@@ -115,7 +115,7 @@ public class Reading
 	 */
 	public Date getFromDate()
 	{
-		Calendar c = new GregorianCalendar();
+		Calendar c = new GregorianCalendar(Tools.UTC_TIMEZONE);
 		c.setTimeInMillis(getTime());
 		//move backwards
 		c.add(Calendar.SECOND, (int)-getInterval());
@@ -128,7 +128,7 @@ public class Reading
 	 */
 	public Date getToDate()
 	{
-		Calendar c = new GregorianCalendar();
+		Calendar c = new GregorianCalendar(Tools.UTC_TIMEZONE);
 		c.setTimeInMillis(getTime());
 		return c.getTime();		
 	}

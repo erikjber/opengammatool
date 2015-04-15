@@ -35,8 +35,10 @@ import jssc.SerialPortList;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
@@ -58,6 +60,10 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat(
 			"yyyy-MM-dd HH:mm:ss");
+	static
+	{
+		DATE_FORMAT.setTimeZone(Tools.UTC_TIMEZONE);
+	}
 	private JFrame frmOpenGammaTool;
 	private JRadioButtonMenuItem rdbtnmntmCountsPerMinute;
 	private JRadioButtonMenuItem rdbtnmntmMicroSievertsPer;
@@ -246,6 +252,8 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 		// create the chart
 		chart = ChartFactory.createTimeSeriesChart("Gamma Scout measured data",
 				"time", "value", dataset, false, true, false);
+		DateAxis dateAxis = (DateAxis) chart.getXYPlot().getDomainAxis();
+		dateAxis.setTimeZone(Tools.UTC_TIMEZONE);
 		chartPanel = new ChartPanel(chart);
 		chartPanel.setInitialDelay(0);
 		chartPanel.setDisplayToolTips(true);

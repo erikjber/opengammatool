@@ -1,11 +1,14 @@
 package com.gammascout.usb;
 
+import java.util.TimeZone;
+
 /**
  * @author Erik Berglund
  *
  */
 public class Tools
 {
+	public static final TimeZone UTC_TIMEZONE = TimeZone.getTimeZone("UTC");
 	public static void sleep(long millis)
 	{
 		try
