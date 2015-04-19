@@ -2,6 +2,8 @@ package com.gammascout.usb;
 
 
 /**
+ * Implement this interface to listen for log data from a GammaScoutConnector.
+ * 
  * @author Erik Berglund
  *
  */

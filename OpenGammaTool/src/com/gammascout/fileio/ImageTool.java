@@ -28,6 +28,8 @@ import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
 
 /**
+ * Tools for converting graphs to various image formats.
+ * 
  * @author Erik Berglund
  * 
  */

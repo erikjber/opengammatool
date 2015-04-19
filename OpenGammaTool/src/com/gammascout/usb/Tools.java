@@ -3,6 +3,8 @@ package com.gammascout.usb;
 import java.util.TimeZone;
 
 /**
+ * Tools, utilities, and global constants.
+ * 
  * @author Erik Berglund
  *
  */

@@ -38,7 +38,6 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
@@ -52,6 +51,8 @@ import com.gammascout.usb.Reading;
 import com.gammascout.usb.Tools;
 
 /**
+ * The main application window, and application entry point.
+ * 
  * @author Erik Berglund
  * 
  */

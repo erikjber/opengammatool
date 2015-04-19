@@ -21,6 +21,8 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
 /**
+ * About dialog. Displays basic information and credis for the application.
+ * 
  * @author Erik Berglund
  * 
  */

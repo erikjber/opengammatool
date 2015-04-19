@@ -20,6 +20,8 @@ import com.gammascout.usb.Reading;
 import com.gammascout.usb.Tools;
 
 /**
+ * Tools for reading and writing GammaScout logs in CSV (comma separated value) format.
+ * 
  * @author Erik Berglund
  *
  */

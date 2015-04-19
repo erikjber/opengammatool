@@ -11,6 +11,9 @@ import jssc.SerialPort;
 import jssc.SerialPortException;
 
 /**
+ * Handles the connection to the GammaScout, encoding commands and decoding log data.
+ * GammaScoutListeners can be connected to this object to receive log data when it is decoded.
+ * 
  * @author Erik Berglund
  * 
  */
@@ -272,7 +275,8 @@ public class GammaScoutConnector implements Runnable
 							// log gap
 							String g1 = pop();
 							String g2 = pop();
-							int gap = Integer.parseInt(g2 + g1, 16);
+							//find the number of seconds that have passed
+							int gap = Integer.parseInt(g2 + g1, 16)*10;
 							long count = decodeCount(pop(), pop());
 							currentLogTime += gap * 1000;
 							Reading r = new Reading(gap, count, currentLogTime);

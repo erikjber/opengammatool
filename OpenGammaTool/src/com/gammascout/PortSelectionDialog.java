@@ -18,6 +18,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 /**
+ * A dialog for selecting the port to use.
+ * 
  * @author Erik Berglund
  * 
  */
