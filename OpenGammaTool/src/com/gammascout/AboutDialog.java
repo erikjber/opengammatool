@@ -21,7 +21,7 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
 /**
- * About dialog. Displays basic information and credis for the application.
+ * About dialog. Displays basic information and credits for the application.
  * 
  * @author Erik Berglund
  * 
@@ -50,7 +50,7 @@ public class AboutDialog extends JDialog implements HyperlinkListener
 		dtrpnOpenGammaTool.setBackground(UIManager
 				.getColor("Button.background"));
 		dtrpnOpenGammaTool
-				.setText("<html><body>\nOpen Gamma Tool<br/>\nVersion 0.1 alpha<br/>\n&#169; 2014 Erik Berglund<br/>\n<br/>\nSpecial thanks to <a href=\"http://johannes-bauer.com/linux/gammascout/\">Johannes Bauer</a><br/>\nfor reverse engineering and documenting <br/>\nthe GammaScout&#8482; protocol<br/>\n</body></html>");
+				.setText("<html><body>\nOpen Gamma Tool<br/>\nVersion 1.0<br/>\n&#169; 2014, 2015 Erik Berglund<br/>\n<br/>\nSpecial thanks to <a href=\"http://johannes-bauer.com/linux/gammascout/\">Johannes Bauer</a><br/>\nfor reverse engineering and documenting <br/>\nthe GammaScout&#8482; protocol<br/>\n</body></html>");
 		GroupLayout gl_contentPanel = new GroupLayout(contentPanel);
 		gl_contentPanel.setHorizontalGroup(gl_contentPanel.createParallelGroup(
 				Alignment.TRAILING).addGroup(
