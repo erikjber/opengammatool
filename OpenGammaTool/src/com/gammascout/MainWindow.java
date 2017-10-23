@@ -38,6 +38,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
@@ -120,7 +121,7 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 	    URL url = cldr.getResource("res/icon.png");
 
 	    if (url == null)
-	        JOptionPane.showMessageDialog(null, "no good");
+	        JOptionPane.showMessageDialog(null, "Could not load icon.");
 
 		try
 		{
@@ -253,6 +254,8 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 		// create the chart
 		chart = ChartFactory.createTimeSeriesChart("Gamma Scout measured data",
 				"time", "value", dataset, false, true, false);
+		chart.getXYPlot().setRangePannable(true);
+		chart.getXYPlot().setDomainPannable(true);
 		DateAxis dateAxis = (DateAxis) chart.getXYPlot().getDomainAxis();
 		dateAxis.setTimeZone(Tools.UTC_TIMEZONE);
 		chartPanel = new ChartPanel(chart);
@@ -269,6 +272,8 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 		chartPanel.setMaximumDrawWidth(7000);
 		chartPanel.setMaximumDrawHeight(4000);
 		chartPanel.setForeground(Color.BLACK);
+		chartPanel.setMouseWheelEnabled(true);
+		
 		frmOpenGammaTool.getContentPane().add(chartPanel);
 
 		btnLoadData = new JButton("Load data");

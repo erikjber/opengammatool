@@ -12,6 +12,8 @@ import java.util.GregorianCalendar;
  */
 public class Reading
 {
+	//number of counts per minute per microSievert per hour. Divice CPM by this number to get uSv/h
+	private static final double CONVERSION_FACTOR = 236;
 	private long time;
 	private long count;
 	private long interval;
@@ -106,7 +108,7 @@ public class Reading
 	 */
 	public double getMicroSievertsPerHour()
 	{
-		return getCountsPerMinute()/142;
+		return getCountsPerMinute()/CONVERSION_FACTOR;
 	}
 
 	/**
