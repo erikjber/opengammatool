@@ -29,16 +29,12 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.SpringLayout;
 import javax.swing.ToolTipManager;
 
-import jssc.SerialPortException;
-import jssc.SerialPortList;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
@@ -46,10 +42,17 @@ import org.jfree.data.xy.DefaultXYDataset;
 
 import com.gammascout.fileio.ImageTool;
 import com.gammascout.fileio.TextTool;
-import com.gammascout.usb.GammaScoutConnector;
+import com.gammascout.usb.GammaScoutConnectorBase;
+import com.gammascout.usb.GammaScoutConnectorV1;
+import com.gammascout.usb.GammaScoutConnectorV2;
 import com.gammascout.usb.GammaScoutListener;
+import com.gammascout.usb.ProtocolVersionDetector;
+import com.gammascout.usb.ProtocolVersionDetector.ProtocolVersion;
 import com.gammascout.usb.Reading;
 import com.gammascout.usb.Tools;
+
+import jssc.SerialPortException;
+import jssc.SerialPortList;
 
 /**
  * The main application window, and application entry point.
@@ -60,8 +63,7 @@ import com.gammascout.usb.Tools;
 public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 {
 
-	private static final DateFormat DATE_FORMAT = new SimpleDateFormat(
-			"yyyy-MM-dd HH:mm:ss");
+	public static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	static
 	{
 		DATE_FORMAT.setTimeZone(Tools.UTC_TIMEZONE);
@@ -71,7 +73,7 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 	private JRadioButtonMenuItem rdbtnmntmMicroSievertsPer;
 	private JCheckBoxMenuItem chckbxmntmHideOverflowReadings;
 	private List<Reading> readings = new ArrayList<>();
-	private GammaScoutConnector gsc;
+	private GammaScoutConnectorBase gsc;
 	private JLabel infoLabel;
 
 	private boolean clearLog;
@@ -115,13 +117,13 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 	 */
 	private void initialize()
 	{
-		frmOpenGammaTool = new JFrame();		
+		frmOpenGammaTool = new JFrame();
 
-	    ClassLoader cldr = MainWindow.class.getClassLoader();
-	    URL url = cldr.getResource("res/icon.png");
+		ClassLoader cldr = MainWindow.class.getClassLoader();
+		URL url = cldr.getResource("res/icon.png");
 
-	    if (url == null)
-	        JOptionPane.showMessageDialog(null, "Could not load icon.");
+		if (url == null)
+			JOptionPane.showMessageDialog(null, "Could not load icon.");
 
 		try
 		{
@@ -132,7 +134,7 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 		{
 			e.printStackTrace();
 		}
-		
+
 		frmOpenGammaTool.setTitle("Open Gamma Tool");
 		frmOpenGammaTool.setBounds(100, 100, 1023, 603);
 		frmOpenGammaTool.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -200,8 +202,7 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 		rdbtnmntmCountsPerMinute.addActionListener(this);
 		mnNewMenu.add(rdbtnmntmCountsPerMinute);
 
-		rdbtnmntmMicroSievertsPer = new JRadioButtonMenuItem(
-				"micro Sieverts per hour");
+		rdbtnmntmMicroSievertsPer = new JRadioButtonMenuItem("micro Sieverts per hour");
 		rdbtnmntmMicroSievertsPer.setActionCommand("microsieverts");
 		rdbtnmntmMicroSievertsPer.setSelected(true);
 		rdbtnmntmMicroSievertsPer.addActionListener(this);
@@ -211,8 +212,7 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 		buttonGroup.add(rdbtnmntmCountsPerMinute);
 		buttonGroup.add(rdbtnmntmMicroSievertsPer);
 
-		chckbxmntmHideOverflowReadings = new JCheckBoxMenuItem(
-				"Hide overflow readings");
+		chckbxmntmHideOverflowReadings = new JCheckBoxMenuItem("Hide overflow readings");
 		chckbxmntmHideOverflowReadings.setSelected(true);
 		chckbxmntmHideOverflowReadings.setActionCommand("refresh");
 		chckbxmntmHideOverflowReadings.addActionListener(this);
@@ -252,8 +252,7 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 
 		dataset = new DefaultXYDataset();
 		// create the chart
-		chart = ChartFactory.createTimeSeriesChart("Gamma Scout measured data",
-				"time", "value", dataset, false, true, false);
+		chart = ChartFactory.createTimeSeriesChart("Gamma Scout measured data", "time", "value", dataset, false, true, false);
 		chart.getXYPlot().setRangePannable(true);
 		chart.getXYPlot().setDomainPannable(true);
 		DateAxis dateAxis = (DateAxis) chart.getXYPlot().getDomainAxis();
@@ -261,82 +260,62 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 		chartPanel = new ChartPanel(chart);
 		chartPanel.setInitialDelay(0);
 		chartPanel.setDisplayToolTips(true);
-		springLayout.putConstraint(SpringLayout.NORTH, chartPanel, 6,
-				SpringLayout.NORTH, frmOpenGammaTool.getContentPane());
-		springLayout.putConstraint(SpringLayout.WEST, chartPanel, 6,
-				SpringLayout.WEST, frmOpenGammaTool.getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, chartPanel, 6,
-				SpringLayout.EAST, frmOpenGammaTool.getContentPane());
-		springLayout.putConstraint(SpringLayout.SOUTH, chartPanel, 6,
-				SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.NORTH, chartPanel, 6, SpringLayout.NORTH, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.WEST, chartPanel, 6, SpringLayout.WEST, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, chartPanel, 6, SpringLayout.EAST, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, chartPanel, 6, SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
 		chartPanel.setMaximumDrawWidth(7000);
 		chartPanel.setMaximumDrawHeight(4000);
 		chartPanel.setForeground(Color.BLACK);
 		chartPanel.setMouseWheelEnabled(true);
-		
+
 		frmOpenGammaTool.getContentPane().add(chartPanel);
 
 		btnLoadData = new JButton("Load data");
 		btnLoadData.setToolTipText("Read all data from connected device");
-		springLayout.putConstraint(SpringLayout.WEST, chartPanel, 0,
-				SpringLayout.WEST, btnLoadData);
-		springLayout.putConstraint(SpringLayout.SOUTH, chartPanel, -6,
-				SpringLayout.NORTH, btnLoadData);
+		springLayout.putConstraint(SpringLayout.WEST, chartPanel, 0, SpringLayout.WEST, btnLoadData);
+		springLayout.putConstraint(SpringLayout.SOUTH, chartPanel, -6, SpringLayout.NORTH, btnLoadData);
 		btnLoadData.setEnabled(false);
-		springLayout.putConstraint(SpringLayout.NORTH, btnLoadData, -31,
-				SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
-		springLayout.putConstraint(SpringLayout.SOUTH, btnLoadData, -6,
-				SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.NORTH, btnLoadData, -31, SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, btnLoadData, -6, SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
 		btnLoadData.addActionListener(this);
 		btnLoadData.setActionCommand("loaddata");
 		btnLoadData.setBackground(Color.GREEN);
 		btnLoadData.setForeground(Color.BLACK);
-		springLayout.putConstraint(SpringLayout.WEST, btnLoadData, 6,
-				SpringLayout.WEST, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.WEST, btnLoadData, 6, SpringLayout.WEST, frmOpenGammaTool.getContentPane());
 		frmOpenGammaTool.getContentPane().add(btnLoadData);
 
 		btnSetTime = new JButton("Set time");
 		btnSetTime.setToolTipText("Set device time to current system time");
 		btnSetTime.setEnabled(false);
-		springLayout.putConstraint(SpringLayout.NORTH, btnSetTime, -31,
-				SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
-		springLayout.putConstraint(SpringLayout.SOUTH, btnSetTime, -6,
-				SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.NORTH, btnSetTime, -31, SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, btnSetTime, -6, SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
 		btnSetTime.addActionListener(this);
 		btnSetTime.setActionCommand("settime");
 		btnSetTime.setBackground(Color.ORANGE);
 		btnSetTime.setForeground(Color.BLACK);
-		springLayout.putConstraint(SpringLayout.WEST, btnSetTime, 118,
-				SpringLayout.WEST, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.WEST, btnSetTime, 118, SpringLayout.WEST, frmOpenGammaTool.getContentPane());
 		frmOpenGammaTool.getContentPane().add(btnSetTime);
 
 		btnClearLog = new JButton("Clear log");
 		btnClearLog.setToolTipText("Erase all log data from device");
 		btnClearLog.setEnabled(false);
-		springLayout.putConstraint(SpringLayout.NORTH, btnClearLog, -31,
-				SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
-		springLayout.putConstraint(SpringLayout.SOUTH, btnClearLog, -6,
-				SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.NORTH, btnClearLog, -31, SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, btnClearLog, -6, SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
 		btnClearLog.addActionListener(this);
 		btnClearLog.setActionCommand("clearlog");
 		btnClearLog.setBackground(Color.RED);
 		btnClearLog.setForeground(Color.BLACK);
-		springLayout.putConstraint(SpringLayout.WEST, btnClearLog, 217,
-				SpringLayout.WEST, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.WEST, btnClearLog, 217, SpringLayout.WEST, frmOpenGammaTool.getContentPane());
 		frmOpenGammaTool.getContentPane().add(btnClearLog);
 
 		infoLabel = new JLabel("Connecting...");
-		springLayout.putConstraint(SpringLayout.EAST, chartPanel, 0,
-				SpringLayout.EAST, infoLabel);
-		springLayout.putConstraint(SpringLayout.WEST, infoLabel, 6,
-				SpringLayout.EAST, btnClearLog);
-		springLayout.putConstraint(SpringLayout.EAST, infoLabel, -6,
-				SpringLayout.EAST, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, chartPanel, 0, SpringLayout.EAST, infoLabel);
+		springLayout.putConstraint(SpringLayout.WEST, infoLabel, 6, SpringLayout.EAST, btnClearLog);
+		springLayout.putConstraint(SpringLayout.EAST, infoLabel, -6, SpringLayout.EAST, frmOpenGammaTool.getContentPane());
 		infoLabel.setForeground(Color.BLACK);
-		springLayout.putConstraint(SpringLayout.NORTH, infoLabel, -26,
-				SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
-		springLayout.putConstraint(SpringLayout.SOUTH, infoLabel, -11,
-				SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.NORTH, infoLabel, -26, SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, infoLabel, -11, SpringLayout.SOUTH, frmOpenGammaTool.getContentPane());
 		frmOpenGammaTool.getContentPane().add(infoLabel);
 
 		ToolTipManager.sharedInstance().setEnabled(true);
@@ -361,24 +340,19 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 					frmOpenGammaTool.dispose();
 					break;
 				case "savepng":
-					ImageTool.savePng(frmOpenGammaTool, chart,
-							chartPanel.getWidth(), chartPanel.getHeight());
+					ImageTool.savePng(frmOpenGammaTool, chart, chartPanel.getWidth(), chartPanel.getHeight());
 					break;
 				case "savejpg":
-					ImageTool.saveJpg(frmOpenGammaTool, chart,
-							chartPanel.getWidth(), chartPanel.getHeight());
+					ImageTool.saveJpg(frmOpenGammaTool, chart, chartPanel.getWidth(), chartPanel.getHeight());
 					break;
 				case "savepdf":
-					ImageTool.savePdf(frmOpenGammaTool, chart,
-							chartPanel.getWidth(), chartPanel.getHeight());
+					ImageTool.savePdf(frmOpenGammaTool, chart, chartPanel.getWidth(), chartPanel.getHeight());
 					break;
 				case "saveeps":
-					ImageTool.saveEps(frmOpenGammaTool, chart,
-							chartPanel.getWidth(), chartPanel.getHeight());
+					ImageTool.saveEps(frmOpenGammaTool, chart, chartPanel.getWidth(), chartPanel.getHeight());
 					break;
 				case "savesvg":
-					ImageTool.saveSvg(frmOpenGammaTool, chart,
-							chartPanel.getWidth(), chartPanel.getHeight());
+					ImageTool.saveSvg(frmOpenGammaTool, chart, chartPanel.getWidth(), chartPanel.getHeight());
 					break;
 				case "linear":
 				case "logarithmic":
@@ -406,8 +380,7 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 					clearLog = true;
 					break;
 				default:
-					System.out.println("Unhandled command: "
-							+ arg.getActionCommand());
+					System.out.println("Unhandled command: " + arg.getActionCommand());
 					break;
 			}
 		}
@@ -428,8 +401,7 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 	private void updateGraph()
 	{
 		// get the selected state
-		boolean ignoreSaturated = this.chckbxmntmHideOverflowReadings
-				.isSelected();
+		boolean ignoreSaturated = this.chckbxmntmHideOverflowReadings.isSelected();
 		boolean countsPerMinute = this.rdbtnmntmCountsPerMinute.isSelected();
 		double[][] matrix = null;
 		synchronized (readings)
@@ -498,9 +470,8 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 				p.getRangeAxis().setLabel("counts per minute (log)");
 			}
 			XYItemRenderer renderer = p.getRenderer();
-			renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator(
-					"<html><body>{1}:<br>{2} c/m</body></html>", DATE_FORMAT,
-					NumberFormat.getInstance()));
+			renderer.setBaseToolTipGenerator(
+					new StandardXYToolTipGenerator("<html><body>{1}:<br>{2} c/m</body></html>", DATE_FORMAT, NumberFormat.getInstance()));
 		}
 		else
 		{
@@ -514,9 +485,8 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 				p.getRangeAxis().setLabel("micro Sieverts per hour (log)");
 			}
 			XYItemRenderer renderer = p.getRenderer();
-			renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator(
-					"<html><body>{1}:<br>{2} &micro;Sv/h</body></html>",
-					DATE_FORMAT, NumberFormat.getInstance()));
+			renderer.setBaseToolTipGenerator(
+					new StandardXYToolTipGenerator("<html><body>{1}:<br>{2} &micro;Sv/h</body></html>", DATE_FORMAT, NumberFormat.getInstance()));
 		}
 		p.getRangeAxis().setAutoRange(true);
 		p.getRangeAxis().setMinorTickMarksVisible(true);
@@ -549,9 +519,8 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 	{
 		setGuiEnabled(false);
 		// ask user for confirmation
-		int result = JOptionPane.showConfirmDialog(frmOpenGammaTool,
-				"Do you really want to clear the internal Gamma Scout log?",
-				"Confirm clear log", JOptionPane.YES_NO_OPTION);
+		int result = JOptionPane.showConfirmDialog(frmOpenGammaTool, "Do you really want to clear the internal Gamma Scout log?", "Confirm clear log",
+				JOptionPane.YES_NO_OPTION);
 		if (result == JOptionPane.YES_OPTION)
 		{
 			try
@@ -618,7 +587,8 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 			if (portNames.length == 0)
 			{
 				// pop up warning
-				JOptionPane.showMessageDialog(frmOpenGammaTool, "Could not find serial port for connecting to Gamma Scout", "Warning - device not found", JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(frmOpenGammaTool, "Could not find serial port for connecting to Gamma Scout",
+						"Warning - device not found", JOptionPane.WARNING_MESSAGE);
 			}
 			else if (portNames.length == 1)
 			{
@@ -635,8 +605,23 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 			}
 			if (portName != null)
 			{
-				gsc = new GammaScoutConnector(portName);
-				gsc.addListener(this);
+				ProtocolVersion version = new ProtocolVersionDetector(portName).getVersion();
+				switch (version)
+				{
+					case VERSION1:
+						gsc = new GammaScoutConnectorV1(portName);
+						break;
+					case VERSION2:
+						gsc = new GammaScoutConnectorV2(portName);
+						break;
+					default:
+						System.out.println("Couldn't determine protocol version.");
+						break;
+				}
+				if(gsc!=null)
+				{
+					gsc.addListener(this);
+				}
 			}
 			Thread t = new Thread(new Runnable()
 			{
@@ -649,8 +634,7 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 				@Override
 				public void run()
 				{
-					NumberFormat memoryPercentFormat = NumberFormat
-							.getPercentInstance();
+					NumberFormat memoryPercentFormat = NumberFormat.getPercentInstance();
 					memoryPercentFormat.setMaximumFractionDigits(1);
 					while (true)
 					{
@@ -659,15 +643,16 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 						// repaint the info string
 						if (gsc != null)
 						{
-							String infoString = "Firmware vers.: "
-									+ gsc.getVersion();
+							String infoString = "Firmware vers.: " + gsc.getVersion();
 							infoString += ", serial: " + gsc.getSerialNumber();
-							infoString += ", "
-									+ memoryPercentFormat.format(gsc
-											.getMemoryUsed()) + " memory used";
-							infoString += ", device time: "
-									+ DATE_FORMAT.format(gsc
-											.getDeviceDateTime());
+							if(gsc.getBytesUsed() != null)
+							{
+								infoString += ", " + memoryPercentFormat.format(gsc.getMemoryUsed()) + " memory used";
+							}
+							if(gsc instanceof GammaScoutConnectorV2)
+							{
+								infoString += ", device time: " + gsc.getDeviceDateTime();
+							}
 							infoLabel.setText(infoString);
 						}
 						else

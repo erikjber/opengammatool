@@ -16,16 +16,22 @@ public class Reading
 	private static final double CONVERSION_FACTOR = 236;
 	private long time;
 	private long count;
-	private long interval;
+	private long intervalSeconds;
 	private boolean saturated;
 
 	public Reading()
 	{
 	}
 
+	/**
+	 * 
+	 * @param gap time interval in seconds.
+	 * @param value count indicated during the time interval.
+	 * @param timeInMillis
+	 */
 	public Reading(int gap, long value, long timeInMillis)
 	{
-		interval = gap;
+		intervalSeconds = gap;
 		count = value;
 		time = timeInMillis;
 	}
@@ -84,7 +90,7 @@ public class Reading
 	 */
 	public long getInterval()
 	{
-		return interval;
+		return intervalSeconds;
 	}
 
 	/**
@@ -94,12 +100,12 @@ public class Reading
 	 */
 	public void setInterval(long interval)
 	{
-		this.interval = interval;
+		this.intervalSeconds = interval;
 	}
 	
 	public double getCountsPerMinute()
 	{
-		return count*60.0/(double)interval;
+		return count*60.0/(double)intervalSeconds;
 	}
 
 	/**

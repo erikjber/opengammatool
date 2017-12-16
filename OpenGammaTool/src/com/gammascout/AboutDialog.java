@@ -50,7 +50,7 @@ public class AboutDialog extends JDialog implements HyperlinkListener
 		dtrpnOpenGammaTool.setBackground(UIManager
 				.getColor("Button.background"));
 		dtrpnOpenGammaTool
-				.setText("<html><body>\nOpen Gamma Tool<br/>\nVersion 1.1<br/>\n&#169; 2014-2017 Erik Berglund<br/>\n<br/>\nSpecial thanks to <a href=\"http://johannes-bauer.com/linux/gammascout/\">Johannes Bauer</a><br/>\nfor reverse engineering and documenting <br/>\nthe GammaScout&#8482; protocol<br/>\n</body></html>");
+				.setText("<html><body>\nOpen Gamma Tool<br/>\nVersion 1.2 (beta)<br/>\n&#169; 2014-2017 Erik Berglund<br/>\n<br/>\nSpecial thanks to <a href=\"http://johannes-bauer.com/linux/gammascout/\">Johannes Bauer</a><br/>\nfor reverse engineering and documenting <br/>\nthe GammaScout&#8482; protocol<br/>\n</body></html>");
 		GroupLayout gl_contentPanel = new GroupLayout(contentPanel);
 		gl_contentPanel.setHorizontalGroup(gl_contentPanel.createParallelGroup(
 				Alignment.TRAILING).addGroup(
