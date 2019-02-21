@@ -45,6 +45,33 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 	}
 
 	@Override
+    protected void readAvailableDataString() throws Exception
+    {
+        synchronized (buffer)
+        {
+            while (!buffer.isEmpty())
+            {
+                String line = buffer.get(0);
+                buffer.remove(0);
+                temporaryBuffer = line; //changed from += to =
+
+                for (int x = 6; x < temporaryBuffer.length() - 1; x += 3) //moved x into loop
+                {
+                    String sub = temporaryBuffer.substring(x, x + 2);
+                    if (!sub.equals("\r\n"))
+                    {
+                        put(sub);
+                        if (totalBytesRead >= bytesUsed)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+	@Override
 	public List<Reading> getLog() throws Exception
 	{
 		// clear the reading data
@@ -54,7 +81,8 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 		readings = new ArrayList<>();
 		serial.writeString("b");
 		waitForString("\r\n");
-		waitForString(" GAMMA-SCOUT Protokoll \r\n\r\n");
+		waitForString(" GAMMA-SCOUT Protokoll \r\n");
+		waitForString("\r\n");
 		int intervalSeconds = 0;
 		long currentLogTime = 0;
 
@@ -63,30 +91,30 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 		synchronized (buffer)
 		{
 			String line = buffer.remove(0);
-			totalBytesRead+=line.length()/2;
+			totalBytesRead+=(line.length()-7)/3; //subtract 6 for address (4) and /n/r (2) and divide by 3 because of spaces to get number of 2 byte packs
 			System.out.println("Read: \"" + line+"\"");
-			String serialString = line.substring(4,6)+line.substring(2,4)+line.substring(0, 2);
+			String serialString = line.substring(12,14)+line.substring(9,11)+line.substring(6, 8);
 			this.serialNumber = Integer.parseInt(serialString);
 		}
 		//skip a line
 		waitForBuffer();
 		String line = buffer.remove(0);
 		System.out.println("Read: \"" + line+"\"");
-		totalBytesRead+=line.length()/2;
+		totalBytesRead+=(line.length()-7)/3;
 		waitForBuffer();
 		// Read the end address
 		line = buffer.remove(0);
 		System.out.println("Read: \"" + line+"\"");
-		totalBytesRead+=line.length()/2;
-		String addressString = line.substring(2,4)+line.substring(0, 2);
-		bytesUsed = Integer.parseInt(addressString);
+		totalBytesRead+=(line.length()-7)/3;
+		String addressString = line.substring(6, 8)+line.substring(9,11);
+		bytesUsed = Integer.parseInt(addressString,16);
 		// Skip to address 0x100
 		while(totalBytesRead < 0x100)
 		{
 			waitForBuffer();
 			line = buffer.remove(0);
 			System.out.println("Read: \"" + line+"\"");
-			totalBytesRead+=line.length()/2;			
+			totalBytesRead+=(line.length()-7)/3;			//This does not account for spaces and newline
 		}
 
 		// read data lines
@@ -94,6 +122,7 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 		{
 			waitForBuffer();
 			readAvailableDataString();
+			System.out.println("one line received");
 			while (bytesAvailable())
 			{
 				String next = pop();
@@ -101,7 +130,11 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 				{
 					case "fe":
 						// set date
-						String mm = pop();
+                        while(this.lineBuffer.size()<5) { //pops can be new line witch hasn't arrived yet
+                            waitForBuffer();
+                            readAvailableDataString();
+                        }
+                        String mm = pop();
 						String HH = pop();
 						String dd = pop();
 						String MM = pop();
@@ -113,6 +146,10 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 						break;
 					case "ff":
 					{
+                        while(this.lineBuffer.size()<4){ //pops can be new line witch hasn't arrived yet
+                            waitForBuffer();
+                            readAvailableDataString();
+                        }
 						String g1 = pop();
 						String g2 = pop();
 						// Give the number of seconds elapsed
@@ -155,6 +192,10 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 						else
 						{
 							// decode impulse count
+                            while(this.lineBuffer.size()<1){ //second pop can be new line witch hasn't arrived yet
+                                waitForBuffer();
+                                readAvailableDataString();
+                            }
 							long count = decodeCount(next, pop());
 							// update time
 							currentLogTime += intervalSeconds * 1000;
@@ -168,6 +209,7 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 			}
 			if (totalBytesRead >= this.bytesUsed)
 			{
+                System.out.println("finished reading data");
 				break;
 			}
 		}
@@ -186,13 +228,25 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 	{
 		// set the time first
 		String timeString = "u" + TIME_FORMAT.format(time);
-		serial.writeString(timeString);
-		waitForString("\r\n Zeit gestellt \r\n");
+        for(int pos=0;pos<timeString.length();pos++) {
+            long start=System.currentTimeMillis();
+            while ((System.currentTimeMillis()) - start<500);
+            System.out.println("set time delay");
+            serial.writeByte(timeString.getBytes()[pos]);
+        }
+		//serial.writeString(timeString);
+		waitForString(" Zeit gestellt \r\n");
 		// then set the date
 
 		String dateString = "d" + DATE_FORMAT.format(time);
-		serial.writeString(dateString);
-		waitForString("\r\n Datum gestellt \r\n");
+		for(int pos=0;pos<dateString.length();pos++) {
+		    long start=System.currentTimeMillis();
+            while ((System.currentTimeMillis()) - start<500);
+            System.out.println("set date delay");
+            serial.writeByte(dateString.getBytes()[pos]);
+        }
+		//serial.writeString(dateString);
+		waitForString(" Datum gestellt \r\n");
 	}
 
 	@Override
@@ -201,6 +255,7 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 		serial.writeString("z");
 		waitForString("\r\n");
 		waitForString(" Protokollspeicher wieder frei \r\n");
+		System.out.println("sucessfully erased storage");
 	}
 
 }
