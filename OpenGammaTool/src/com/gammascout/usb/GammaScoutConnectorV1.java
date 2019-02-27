@@ -64,6 +64,26 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 		connected = true;
 	}
 
+	protected boolean bytesAvailable() {
+		String first = peek();
+		if (first == null) { //no new byte available return directely
+			return false;
+		}
+		if (first.equals("fe") && lineBuffer.size() < 6) {
+			return false;//note enough data for date change command (6 bytes)
+		} else if (first.equals("ff") && lineBuffer.size() < 5){
+			return false;//note enough data for time change command (5 bytes)
+		} else if (first.equals("f4") || first.equals("f3") ||first.equals("f2") || first.equals("f1")|| first.equals("f0")){
+			return true;//one byte command do not care if there is none left in the buffer
+		}else{//actual value incoming, we need at least two bytes
+			if(lineBuffer.size()>=2){
+				return true;
+			}else {
+				return false;
+			}
+		}
+	}
+
 	@Override
     protected void readAvailableDataString() throws Exception
     {
@@ -87,6 +107,10 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
                         }
                     }
                 }
+				if (totalBytesRead >= bytesUsed)
+				{
+					break;
+				}
             }
         }
     }
@@ -126,15 +150,16 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 		line = buffer.remove(0);
 		System.out.println("Read: \"" + line+"\"");
 		totalBytesRead+=(line.length()-7)/3;
-		String addressString = line.substring(6, 8)+line.substring(9,11);
+		String addressString = line.substring(9,11)+line.substring(6, 8);
 		bytesUsed = Integer.parseInt(addressString,16);
+		System.out.println("Expecting "+bytesUsed.toString()+" bytes to arrive or in hex address read till: "+addressString);
 		// Skip to address 0x100
 		while(totalBytesRead < 0x100)
 		{
 			waitForBuffer();
 			line = buffer.remove(0);
 			System.out.println("Read: \"" + line+"\"");
-			totalBytesRead+=(line.length()-7)/3;			//This does not account for spaces and newline
+			totalBytesRead+=(line.length()-7)/3;
 		}
 
 		// read data lines
@@ -149,11 +174,8 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 				switch (next)
 				{
 					case "fe":
+						System.out.println("changing DateFormat");
 						// set date
-                        while(this.lineBuffer.size()<5) { //pops can be new line witch hasn't arrived yet
-                            waitForBuffer();
-                            readAvailableDataString();
-                        }
                         String mm = pop();
 						String HH = pop();
 						String dd = pop();
@@ -166,10 +188,7 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 						break;
 					case "ff":
 					{
-                        while(this.lineBuffer.size()<4){ //pops can be new line witch hasn't arrived yet
-                            waitForBuffer();
-                            readAvailableDataString();
-                        }
+						System.out.println("Got new interval");
 						String g1 = pop();
 						String g2 = pop();
 						// Give the number of seconds elapsed
@@ -212,16 +231,14 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 						else
 						{
 							// decode impulse count
-                            while(this.lineBuffer.size()<1){ //second pop can be new line witch hasn't arrived yet
-                                waitForBuffer();
-                                readAvailableDataString();
-                            }
-							long count = decodeCount(next, pop());
+
+                            long count = decodeCount(next, pop());
 							// update time
 							currentLogTime += intervalSeconds * 1000;
 							Reading r = new Reading(intervalSeconds, count, currentLogTime);
 							readings.add(r);
 							announceReading(r);
+							System.out.println("Got new impulse with:"+ Long.toString(count));
 						}
 						break;
 				}
@@ -229,7 +246,9 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 			}
 			if (totalBytesRead >= this.bytesUsed)
 			{
-                System.out.println("finished reading data");
+                System.out.println("finished reading data...");
+				System.out.println("please wait before sending any further commands like set date/time or clearing storage because");
+				System.out.println("the device still sends data and does not respond to any querries within about 1 minute");
 				break;
 			}
 		}
