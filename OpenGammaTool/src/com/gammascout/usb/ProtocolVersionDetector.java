@@ -81,7 +81,6 @@ public class ProtocolVersionDetector
 		try
 		{
 			String prelude = serial.readString(10, 1000);
-			System.out.println("Read \""+prelude+"\"");
 			if(prelude.startsWith("\r\n Vers"))
 			{
 				result = ProtocolVersion.VERSION1;
@@ -94,13 +93,11 @@ public class ProtocolVersionDetector
 		}
 		catch (SerialPortTimeoutException e)
 		{
-			System.out.println("Timed out waiting for response.");
-			e.printStackTrace();
+			// Do nothing, this is expected if we're using the wrong protocol version.
 		}
 		finally
 		{
 			String remainder = serial.readString();
-			System.out.println("Read \""+remainder+"\"");
 			serial.closePort();
 		}
 		return result;

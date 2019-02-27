@@ -626,17 +626,24 @@ public class MainWindow implements ActionListener, GammaScoutListener, Runnable
 			if (portName != null)
 			{
 				ProtocolVersion version = new ProtocolVersionDetector(portName).getVersion();
-				switch (version)
+				if(version != null)
 				{
-					case VERSION1:
-						gsc = new GammaScoutConnectorV1(portName);
-						break;
-					case VERSION2:
-						gsc = new GammaScoutConnectorV2(portName);
-						break;
-					default:
-						System.out.println("Couldn't determine protocol version.");
-						break;
+					switch (version)
+					{
+						case VERSION1:
+							gsc = new GammaScoutConnectorV1(portName);
+							break;
+						case VERSION2:
+							gsc = new GammaScoutConnectorV2(portName);
+							break;
+						default:
+							System.out.println("Couldn't determine protocol version.");
+							break;
+					}
+				}
+				else
+				{
+					System.out.println("Protocol version detection failed.");
 				}
 				if(gsc!=null)
 				{

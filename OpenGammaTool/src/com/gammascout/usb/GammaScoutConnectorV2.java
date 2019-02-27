@@ -103,9 +103,9 @@ public class GammaScoutConnectorV2 extends GammaScoutConnectorBase
 			{
 				Tools.sleep(500);
 			}
-			waitForString("\r\n");
-			waitForString("Datum und Zeit gestellt\r\n");
 		}
+		waitForString("\r\n");
+		waitForString("Datum und Zeit gestellt\r\n");
 		updateInfo();
 		setPcMode(false);
 	}
