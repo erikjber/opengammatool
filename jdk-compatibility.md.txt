@@ -1,8 +1,0 @@
-jdk1.8.0_202
-does work
-
-jdk-11
-compilation fails with 
-# EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x000000007110b5db, pid=11072, tid=6780
-# Problematic frame:
-# C  [jSSC-2.8_x86_64.dll+0xb5db]
