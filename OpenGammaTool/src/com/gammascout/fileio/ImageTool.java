@@ -53,7 +53,7 @@ import com.itextpdf.text.pdf.PdfWriter;
  * @author Erik Berglund
  * 
  */
-public class ImageTool
+public class ImageTool extends FileTool
 {
 	/**
 	 * @param frame
@@ -70,12 +70,17 @@ public class ImageTool
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
 				"PDF Images", "pdf");
 		fileChooser.setFileFilter(filter);
+		if(lastDirectory!=null)
+		{
+			fileChooser.setCurrentDirectory(lastDirectory);
+		}
 		int option = fileChooser.showSaveDialog(frame);
 		if (option == JFileChooser.APPROVE_OPTION
 				&& fileChooser.getSelectedFile() != null
 				&& !fileChooser.getSelectedFile().isDirectory())
 		{
 			File f = fileChooser.getSelectedFile();
+			lastDirectory = f.getParentFile();
 			if (f.exists())
 			{
 				// confirm over-write
@@ -140,12 +145,17 @@ public class ImageTool
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
 				"SVG Images", "svg");
 		fileChooser.setFileFilter(filter);
+		if(lastDirectory!=null)
+		{
+			fileChooser.setCurrentDirectory(lastDirectory);
+		}
 		int option = fileChooser.showSaveDialog(frame);
 		if (option == JFileChooser.APPROVE_OPTION
 				&& fileChooser.getSelectedFile() != null
 				&& !fileChooser.getSelectedFile().isDirectory())
 		{
 			File f = fileChooser.getSelectedFile();
+			lastDirectory = f.getParentFile();
 			if (f.exists())
 			{
 				// confirm over-write
@@ -202,12 +212,17 @@ public class ImageTool
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
 				"EPS Images", "eps");
 		fileChooser.setFileFilter(filter);
+		if(lastDirectory!=null)
+		{
+			fileChooser.setCurrentDirectory(lastDirectory);
+		}
 		int option = fileChooser.showSaveDialog(frame);
 		if (option == JFileChooser.APPROVE_OPTION
 				&& fileChooser.getSelectedFile() != null
 				&& !fileChooser.getSelectedFile().isDirectory())
 		{
 			File f = fileChooser.getSelectedFile();
+			lastDirectory = f.getParentFile();
 			if (f.exists())
 			{
 				// confirm over-write
@@ -254,12 +269,17 @@ public class ImageTool
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
 				"PNG Images", "png");
 		fileChooser.setFileFilter(filter);
+		if(lastDirectory!=null)
+		{
+			fileChooser.setCurrentDirectory(lastDirectory);
+		}
 		int option = fileChooser.showSaveDialog(frame);
 		if (option == JFileChooser.APPROVE_OPTION
 				&& fileChooser.getSelectedFile() != null
 				&& !fileChooser.getSelectedFile().isDirectory())
 		{
 			File f = fileChooser.getSelectedFile();
+			lastDirectory = f.getParentFile();
 			if (f.exists())
 			{
 				// confirm over-write
@@ -300,12 +320,17 @@ public class ImageTool
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
 				"JPG Images", "jpg", "jpeg");
 		fileChooser.setFileFilter(filter);
+		if(lastDirectory!=null)
+		{
+			fileChooser.setCurrentDirectory(lastDirectory);
+		}
 		int option = fileChooser.showSaveDialog(frame);
 		if (option == JFileChooser.APPROVE_OPTION
 				&& fileChooser.getSelectedFile() != null
 				&& !fileChooser.getSelectedFile().isDirectory())
 		{
 			File f = fileChooser.getSelectedFile();
+			lastDirectory = f.getParentFile();
 			if (f.exists())
 			{
 				// confirm over-write

@@ -45,13 +45,14 @@ import com.gammascout.usb.Tools;
  * @author Erik Berglund
  *
  */
-public class TextTool
+public class TextTool extends FileTool
 {
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	static
 	{
 		DATE_FORMAT.setTimeZone(Tools.UTC_TIMEZONE);
 	}
+	
 	/**
 	 * Open a "save as" dialog and ask the user for a file name.
 	 * Write the data as Comma Separated Values (CSV) to the desired file.
@@ -68,10 +69,15 @@ public class TextTool
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
 		        "CSV files", "csv");
 		fileChooser.setFileFilter(filter);
+		if(lastDirectory!=null)
+		{
+			fileChooser.setCurrentDirectory(lastDirectory);
+		}
 		int option = fileChooser.showSaveDialog(frame);
 		if(option == JFileChooser.APPROVE_OPTION && fileChooser.getSelectedFile() != null && !fileChooser.getSelectedFile().isDirectory())
 		{
 			File f = fileChooser.getSelectedFile();
+			lastDirectory = f.getParentFile();
 			if(f.exists())
 			{
 				//confirm over-write
@@ -118,12 +124,17 @@ public class TextTool
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
 		        "CSV files", "csv");
 		fileChooser.setFileFilter(filter);
+		if(lastDirectory!=null)
+		{
+			fileChooser.setCurrentDirectory(lastDirectory);
+		}
 		int option = fileChooser.showOpenDialog(frame);
 		if(option == JFileChooser.APPROVE_OPTION && fileChooser.getSelectedFile() != null && !fileChooser.getSelectedFile().isDirectory())
 		{
 			File f = fileChooser.getSelectedFile();
 			if(f.exists() )
 			{
+				lastDirectory = f.getParentFile();
 				//clear old values
 				data.clear();
 				//read line-by-line
