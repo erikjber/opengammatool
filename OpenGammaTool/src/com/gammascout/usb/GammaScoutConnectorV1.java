@@ -246,12 +246,12 @@ public class GammaScoutConnectorV1 extends GammaScoutConnectorBase
 			}
 			if (totalBytesRead >= this.bytesUsed)
 			{
-                System.out.println("finished reading data...");
-				System.out.println("please wait before sending any further commands like set date/time or clearing storage because");
-				System.out.println("the device still sends data and does not respond to any querries within about 1 minute");
+				System.out.println("finished reading actual data, wait for protocol to finish...");
 				break;
 			}
 		}
+
+		waitForMatchString("07f0",60000); //time it actually takes are 53 seconds from line 100
 		return readings;
 	}
 

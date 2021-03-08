@@ -210,6 +210,31 @@ public abstract class GammaScoutConnectorBase implements Runnable
 		e.printStackTrace();
 	}
 
+	protected void waitForMatchString(String string,long timeoutMS)
+	{
+		long start = System.currentTimeMillis();
+		while (System.currentTimeMillis() - start < timeoutMS)
+		{
+			synchronized (buffer)
+			{
+				while (!buffer.isEmpty())
+				{
+					String line = buffer.get(0);
+					buffer.remove(0);
+					if (line.contains(string))
+					{
+						return;
+					}
+				}
+			}
+			Tools.sleep(50);
+		}
+		Exception e = new Exception("Timed out while trying to match with string \"" + string + "\".");
+		e.printStackTrace();
+	}
+
+
+
 	/**
 	 * Wait for any data to appear in the input queue, or the timeout.
 	 * 
